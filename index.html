@@ -2,112 +2,103 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Noon Delivery Assistant</title>
+<title>Noon Chat</title>
 
 <style>
 body {
-  margin: 0;
-  font-family: Arial;
-  background: #e5ddd5;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  margin:0;
+  font-family:Arial;
+  background:#e5ddd5;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
 }
 
 .chat-container {
-  width: 400px;
-  height: 600px;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 0 20px rgba(0,0,0,0.2);
+  width:400px;
+  height:600px;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+  border-radius:15px;
+  overflow:hidden;
 }
 
 .header {
-  background: #FEE500;
-  padding: 15px;
-  font-weight: bold;
+  background:#FEE500;
+  padding:15px;
+  font-weight:bold;
 }
 
 .chat {
-  flex: 1;
-  padding: 10px;
-  overflow-y: auto;
-  background: #efeae2;
+  flex:1;
+  padding:10px;
+  overflow-y:auto;
 }
 
 .row {
-  display: flex;
-  align-items: flex-end;
-  margin: 5px;
+  display:flex;
+  margin:5px;
 }
 
 .avatar {
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  margin-right: 8px;
+  width:35px;
+  height:35px;
+  border-radius:50%;
+  margin-right:5px;
 }
 
 .message {
-  max-width: 70%;
-  padding: 10px;
-  border-radius: 10px;
+  padding:10px;
+  border-radius:10px;
+  max-width:70%;
 }
 
-.bot { background: #fff; }
-.user { background: #dcf8c6; margin-left: auto; }
+.bot { background:#fff; }
+.user { background:#dcf8c6; margin-left:auto; }
 
 .time {
-  font-size: 10px;
-  color: gray;
-  margin-top: 3px;
-  text-align: right;
+  font-size:10px;
+  color:gray;
 }
 
 .input-area {
-  display: flex;
-  padding: 10px;
-  background: #f0f0f0;
+  display:flex;
+  padding:10px;
 }
 
 input {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  border-radius: 20px;
-  outline: none;
+  flex:1;
+  padding:10px;
+  border-radius:20px;
+  border:none;
 }
 
 button {
-  margin-left: 10px;
-  padding: 10px 15px;
-  background: #FEE500;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
+  margin-left:10px;
+  background:#FEE500;
+  border:none;
+  padding:10px;
 }
 
 /* typing */
 .typing span {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin: 2px;
-  background: #999;
-  border-radius: 50%;
-  animation: bounce 1.4s infinite;
+  display:inline-block;
+  width:6px;
+  height:6px;
+  background:#999;
+  margin:2px;
+  border-radius:50%;
+  animation:bounce 1.4s infinite;
 }
 
-.typing span:nth-child(2) { animation-delay: 0.2s; }
-.typing span:nth-child(3) { animation-delay: 0.4s; }
+.typing span:nth-child(2){animation-delay:.2s;}
+.typing span:nth-child(3){animation-delay:.4s;}
 
 @keyframes bounce {
-  0%,80%,100% { transform: scale(0); }
-  40% { transform: scale(1); }
+  0%,80%,100%{transform:scale(0);}
+  40%{transform:scale(1);}
 }
 </style>
 </head>
@@ -115,125 +106,103 @@ button {
 <body>
 
 <div class="chat-container">
-
-  <div class="header">🚚 Noon Delivery Assistant</div>
-
+  <div class="header">🚚 Noon Assistant</div>
   <div class="chat" id="chat"></div>
 
   <div class="input-area">
-    <input id="msg" placeholder="اكتب هنا..." onkeypress="handleEnter(event)">
+    <input id="msg" onkeypress="if(event.key==='Enter')send()">
     <button onclick="send()">إرسال</button>
   </div>
-
 </div>
 
 <audio id="sound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
 
 <script>
 
-// 💾 تحميل المحادثة
-let history = JSON.parse(localStorage.getItem("chat")) || [];
+let history = JSON.parse(localStorage.getItem("history")) || [];
+let chatData = JSON.parse(localStorage.getItem("chat")) || [];
 
-// ⏱️ وقت
-function getTime() {
-  let d = new Date();
-  return d.getHours() + ":" + ("0" + d.getMinutes()).slice(-2);
+function time(){
+  let d=new Date();
+  return d.getHours()+":"+("0"+d.getMinutes()).slice(-2);
 }
 
-// 🖥️ عرض الرسائل
-function render() {
-  let chat = document.getElementById("chat");
-  chat.innerHTML = "";
+function render(){
+  let chat=document.getElementById("chat");
+  chat.innerHTML="";
 
-  history.forEach(msg => {
-    if (msg.role === "user") {
-      chat.innerHTML += `
-        <div class="row" style="justify-content:flex-end">
-          <div>
-            <div class="message user">${msg.text}</div>
-            <div class="time">${msg.time}</div>
-          </div>
+  chatData.forEach(m=>{
+    if(m.role==="user"){
+      chat.innerHTML+=`
+      <div class="row" style="justify-content:flex-end">
+        <div>
+          <div class="message user">${m.text}</div>
+          <div class="time">${m.time}</div>
         </div>
-      `;
-    } else {
-      chat.innerHTML += `
-        <div class="row">
-          <img class="avatar" src="https://i.imgur.com/6VBx3io.png">
-          <div>
-            <div class="message bot">${msg.text}</div>
-            <div class="time">${msg.time}</div>
-          </div>
+      </div>`;
+    }else{
+      chat.innerHTML+=`
+      <div class="row">
+        <img class="avatar" src="https://i.imgur.com/6VBx3io.png">
+        <div>
+          <div class="message bot">${m.text}</div>
+          <div class="time">${m.time}</div>
         </div>
-      `;
+      </div>`;
     }
   });
 
-  chat.scrollTop = chat.scrollHeight;
+  chat.scrollTop=chat.scrollHeight;
 }
 
-// أول تحميل
 render();
 
-// enter
-function handleEnter(e) {
-  if (e.key === "Enter") send();
-}
+function send(){
+  let input=document.getElementById("msg");
+  let msg=input.value.trim();
+  if(!msg) return;
 
-// إرسال
-function send() {
-  let input = document.getElementById("msg");
-  let msg = input.value.trim();
+  chatData.push({role:"user",text:msg,time:time()});
+  history.push({role:"user",content:msg});
 
-  if (!msg) return;
+  localStorage.setItem("chat",JSON.stringify(chatData));
+  localStorage.setItem("history",JSON.stringify(history));
 
-  // user msg
-  history.push({ role: "user", text: msg, time: getTime() });
-  localStorage.setItem("chat", JSON.stringify(history));
   render();
+  input.value="";
 
-  input.value = "";
-
-  // typing
-  let chat = document.getElementById("chat");
-  const id = "t" + Date.now();
-
-  chat.innerHTML += `
-    <div class="row" id="${id}">
-      <img class="avatar" src="https://i.imgur.com/6VBx3io.png">
-      <div class="message bot">
-        <div class="typing">
-          <span></span><span></span><span></span>
-        </div>
+  const id="t"+Date.now();
+  document.getElementById("chat").innerHTML+=`
+  <div class="row" id="${id}">
+    <img class="avatar" src="https://i.imgur.com/6VBx3io.png">
+    <div class="message bot">
+      <div class="typing">
+        <span></span><span></span><span></span>
       </div>
     </div>
-  `;
+  </div>`;
 
-  chat.scrollTop = chat.scrollHeight;
-
-  fetch("https://eouzdbt3b247439.m.pipedream.net/", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({message: msg})
+  fetch("https://eouzdbt3b247439.m.pipedream.net/",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      message:msg,
+      history:history
+    })
   })
-  .then(res => res.json())
-  .then(data => {
+  .then(r=>r.json())
+  .then(d=>{
     document.getElementById(id).remove();
 
-    // صوت 🔔
     document.getElementById("sound").play();
 
-    // bot msg
-    history.push({
-      role: "bot",
-      text: data.reply,
-      time: getTime()
-    });
+    chatData.push({role:"bot",text:d.reply,time:time()});
+    history.push({role:"assistant",content:d.reply});
 
-    localStorage.setItem("chat", JSON.stringify(history));
+    localStorage.setItem("chat",JSON.stringify(chatData));
+    localStorage.setItem("history",JSON.stringify(history));
+
     render();
-  })
-  .catch(() => {
-    document.getElementById(id).remove();
   });
 }
 
