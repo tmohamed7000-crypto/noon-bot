@@ -59,7 +59,7 @@ function send() {
 
   chat.innerHTML += `<div class="user">${msg}</div>`;
 
-  fetch("YOUR_N8N_WEBHOOK", {
+  fetch("https://eouzdbt3b247439.m.pipedream.net", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({message: msg})
