@@ -201,6 +201,12 @@ function send() {
     addMessage("حصل خطأ 😅", "bot");
   });
 }
+  document.getElementById("msg").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault(); // يمنع نزول سطر
+    send();
+  }
+});
 </script>
 
 </body>
