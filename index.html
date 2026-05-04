@@ -9,10 +9,37 @@ body {
   margin:0;
   font-family:Arial;
   background:#e5ddd5;
-  display:flex;
-  justify-content:center;
-  align-items:center;
   height:100vh;
+}
+
+/* يخلي الشات يملأ الشاشة */
+.chat-container {
+  width:100%;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  background:#efeae2;
+}
+
+/* الهيدر ثابت */
+.header {
+  background:#FEE500;
+  padding:15px;
+  font-weight:bold;
+}
+
+/* الشات يتمدد */
+.chat {
+  flex:1;
+  padding:10px;
+  overflow-y:auto;
+}
+
+/* input ثابت تحت */
+.input-area {
+  display:flex;
+  padding:10px;
+  background:#f0f0f0;
 }
 
 .chat-container {
