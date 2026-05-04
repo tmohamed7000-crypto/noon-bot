@@ -1,150 +1,3 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-<meta charset="UTF-8">
-<title>Noon Assistant</title>
-
-<style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #e5ddd5;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* الهيدر */
-.header {
-  background: #FEE500;
-  padding: 15px;
-  font-weight: bold;
-}
-
-/* الشات */
-.chat {
-  flex: 1;
-  overflow-y: auto;
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-}
-
-/* الرسائل */
-.message {
-  display: flex;
-  margin: 5px 0;
-}
-
-.bot {
-  justify-content: flex-start;
-}
-
-.user {
-  justify-content: flex-end;
-}
-
-.bubble {
-  max-width: 60%;
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 14px;
-}
-
-.bot .bubble {
-  background: #fff;
-}
-
-.user .bubble {
-  background: #dcf8c6;
-}
-
-.time {
-  font-size: 10px;
-  color: gray;
-  margin-top: 3px;
-}
-
-/* الكتابة */
-.typing {
-  display: flex;
-  gap: 4px;
-}
-
-.dot {
-  width: 6px;
-  height: 6px;
-  background: gray;
-  border-radius: 50%;
-  animation: blink 1.4s infinite;
-}
-
-.dot:nth-child(2) { animation-delay: 0.2s; }
-.dot:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes blink {
-  0% { opacity: 0.2 }
-  20% { opacity: 1 }
-  100% { opacity: 0.2 }
-}
-
-/* input */
-.input-area {
-  display: flex;
-  padding: 10px;
-  background: #f0f0f0;
-}
-
-input {
-  flex: 1;
-  padding: 10px;
-  border-radius: 20px;
-  border: none;
-}
-
-button {
-  margin-left: 10px;
-  padding: 10px 15px;
-  border: none;
-  background: #FEE500;
-  cursor: pointer;
-}
-</style>
-</head>
-
-<body>
-
-<div class="header">🚚 Noon Assistant</div>
-
-<div class="chat" id="chat"></div>
-
-<div class="input-area">
-  <input id="msg" placeholder="اكتب هنا...">
-  <button onclick="send()">إرسال</button>
-</div>
-
-<script>
-const chat = document.getElementById("chat");
-
-// تحميل المحادثة من الذاكرة
-window.onload = () => {
-  const saved = localStorage.getItem("chat");
-  if (saved) chat.innerHTML = saved;
-};
-
-function saveChat() {
-  localStorage.setItem("chat", chat.innerHTML);
-}
-
-function getTime() {
-  const now = new Date();
-  return now.getHours() + ":" + now.getMinutes();
-}
-
 function addMessage(text, type) {
   chat.innerHTML += `
     <div class="message ${type}">
@@ -181,6 +34,20 @@ function send() {
   let msg = document.getElementById("msg").value.trim();
   if (!msg) return;
 
+  // 🔥 تحميل الهيستوري
+  let history = JSON.parse(localStorage.getItem("history") || "[]");
+
+  // 🧠 إضافة رسالة المستخدم
+  history.push({
+    role: "user",
+    content: msg
+  });
+
+  // 🔥 limit (مهم)
+  if (history.length > 10) {
+    history = history.slice(-10);
+  }
+
   addMessage(msg, "user");
   document.getElementById("msg").value = "";
 
@@ -189,25 +56,35 @@ function send() {
   fetch("https://eouzdbt3b247439.m.pipedream.net/", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({message: msg})
+    body: JSON.stringify({
+      message: msg,
+      history: history
+    })
   })
   .then(res => res.json())
   .then(data => {
     removeTyping();
+
     addMessage(data.reply, "bot");
+
+    // 🧠 حفظ رد البوت
+    history.push({
+      role: "assistant",
+      content: data.reply
+    });
+
+    localStorage.setItem("history", JSON.stringify(history));
   })
   .catch(() => {
     removeTyping();
     addMessage("حصل خطأ 😅", "bot");
   });
 }
-  document.getElementById("msg").addEventListener("keydown", function(e) {
+
+// ⌨️ Enter = إرسال
+document.getElementById("msg").addEventListener("keydown", function(e) {
   if (e.key === "Enter") {
-    e.preventDefault(); // يمنع نزول سطر
+    e.preventDefault();
     send();
   }
 });
-</script>
-
-</body>
-</html>
